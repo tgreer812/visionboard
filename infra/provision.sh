@@ -61,9 +61,15 @@ az containerapp hostname bind -n "$APP" -g "$RG" --hostname "$HOST" --environmen
 APP_ID=$(az ad app list --display-name visionboard-github-deploy --query "[0].appId" -o tsv)
 if [ -z "$APP_ID" ]; then APP_ID=$(az ad app create --display-name visionboard-github-deploy --query appId -o tsv); fi
 az ad sp show --id "$APP_ID" -o none 2>/dev/null || az ad sp create --id "$APP_ID" -o none
-az ad app federated-credential create --id "$APP_ID" --parameters "{
-  \"name\":\"github-main\",\"issuer\":\"https://token.actions.githubusercontent.com\",
-  \"subject\":\"repo:$REPO:ref:refs/heads/main\",\"audiences\":[\"api://AzureADTokenExchange\"]}" -o none 2>/dev/null || true
+# GitHub may present either the classic subject or one with immutable owner/repo ids; trust both.
+OWNER_ID=$(gh api "repos/$REPO" --jq .owner.id)
+REPO_ID=$(gh api "repos/$REPO" --jq .id)
+for pair in "github-main|repo:$REPO:ref:refs/heads/main" \
+            "github-main-ids|repo:${REPO%%/*}@$OWNER_ID/${REPO##*/}@$REPO_ID:ref:refs/heads/main"; do
+  az ad app federated-credential create --id "$APP_ID" --parameters "{
+    \"name\":\"${pair%%|*}\",\"issuer\":\"https://token.actions.githubusercontent.com\",
+    \"subject\":\"${pair#*|}\",\"audiences\":[\"api://AzureADTokenExchange\"]}" -o none 2>/dev/null || true
+done
 RG_ID=$(az group show -n "$RG" --query id -o tsv)
 az role assignment create --assignee "$APP_ID" --role Contributor --scope "$RG_ID" -o none 2>/dev/null || true
 gh variable set AZURE_CLIENT_ID --repo "$REPO" --body "$APP_ID"

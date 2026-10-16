@@ -89,7 +89,6 @@ function buildImage(el, id, y) {
   img.alt = y.get('name') || '';
   img.draggable = false;
   img.decoding = 'async';
-  img.loading = 'lazy';
   img.addEventListener('error', () => brokenNote(el, "This image couldn't be loaded"));
   img.src = y.get('src');
   el.append(img, hoverTools(id));
