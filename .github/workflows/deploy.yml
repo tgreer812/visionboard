@@ -1,0 +1,82 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/tgreer812/visionboard
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+
+      - name: Azure login
+        if: vars.AZURE_CLIENT_ID != ''
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Roll out the new image
+        if: vars.AZURE_CLIENT_ID != ''
+        run: |
+          az containerapp update \
+            --name visionboard \
+            --resource-group tg-visionboard \
+            --image ${{ env.IMAGE }}:${{ github.sha }} \
+            --output none
+          az containerapp show -n visionboard -g tg-visionboard \
+            --query "{revision:properties.latestRevisionName, fqdn:properties.configuration.ingress.fqdn}" -o table
+
+      - name: Smoke test
+        if: vars.AZURE_CLIENT_ID != ''
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS https://visionboard.tylergreer.io/healthz; then exit 0; fi
+            sleep 5
+          done
+          echo "Site did not become healthy" >&2
+          exit 1

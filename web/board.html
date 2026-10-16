@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Vision Board</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif&display=swap">
+</head>
+<body class="board">
+  <div id="stage" class="dotgrid">
+    <div id="world"></div>
+    <div id="marquee" hidden></div>
+  </div>
+  <div id="ghosts" aria-hidden="true"></div>
+
+  <div id="empty">
+    <div class="card">
+      <h1>Pin your references</h1>
+      <p>Drop images, videos, audio or 3D models anywhere, paste with <kbd>Ctrl</kbd> <kbd>V</kbd>, or double-click to write a note. Everyone with this link sees changes live.</p>
+    </div>
+  </div>
+
+  <header id="topbar" class="chrome">
+    <a class="tb home" href="/" title="All rooms">
+      <svg viewBox="0 0 24 28"><path d="M12 1C6.5 1 3 5 3 10.5V26l3-2.2 3 2.2 3-2.2 3 2.2 3-2.2 3 2.2V10.5C21 5 17.5 1 12 1z"/><circle cx="9" cy="11" r="1.7"/><circle cx="15" cy="11" r="1.7"/></svg>
+    </a>
+    <input id="title" class="title" placeholder="Untitled room" maxlength="80" spellcheck="false" aria-label="Room name">
+    <span class="sep"></span>
+    <button class="tb" id="share" type="button" title="Copy the room link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+      <span class="lbl">Copy link</span>
+    </button>
+    <button class="tb" id="add" type="button" title="Add files">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span class="lbl">Add files</span>
+    </button>
+    <button class="tb" id="note" type="button" title="Add a note (T)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+      <span class="lbl">Note</span>
+    </button>
+    <button class="tb" id="fit" type="button" title="Fit everything (F)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </button>
+    <button class="tb zoom" id="zoom" type="button" title="Zoom to 100%">100%</button>
+    <input type="file" id="file-input" multiple hidden>
+  </header>
+
+  <div id="people" class="chrome">
+    <span id="status" class="status" title="Connecting"></span>
+    <div id="avatars"></div>
+  </div>
+
+  <div id="selbar" class="chrome" role="toolbar" aria-label="Selection" hidden>
+    <button class="sb" id="sb-download" type="button" title="Download">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+      <span>Download</span>
+    </button>
+    <button class="sb" id="sb-font" type="button" title="Typeface">Aa</button>
+    <button class="sb" id="sb-smaller" type="button" title="Smaller text">A−</button>
+    <button class="sb" id="sb-bigger" type="button" title="Bigger text">A+</button>
+    <span class="sep" id="sb-sep"></span>
+    <button class="sb" id="sb-front" type="button" title="Bring to front">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>
+    </button>
+    <button class="sb" id="sb-back" type="button" title="Send to back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="12" height="12" rx="2"/><path d="M20 8v10a2 2 0 0 1-2 2H8"/></svg>
+    </button>
+    <button class="sb" id="sb-dup" type="button" title="Duplicate (Ctrl+D)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg>
+    </button>
+    <button class="sb danger" id="sb-delete" type="button" title="Remove (Delete)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+    </button>
+  </div>
+
+  <div id="hint"><kbd>Scroll</kbd> zoom · drag to pan · <kbd>Shift</kbd>-drag to select · double-click to write · <kbd>Ctrl</kbd><kbd>Z</kbd> undo</div>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <script type="module" src="/src/board/main.js"></script>
+</body>
+</html>

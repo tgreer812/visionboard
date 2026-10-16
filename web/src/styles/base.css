@@ -1,0 +1,63 @@
+/* Vision Board — a lightbox: one dark ground, quiet chrome, references read true.
+   Single-theme on purpose (like PureRef), so colours are fixed and form controls follow dark. */
+:root {
+  --ground: #161719;
+  --dot: #2a2c31;
+  --panel: #202226;
+  --panel-hi: #2a2d32;
+  --panel-top: #33373d;
+  --line: #383c43;
+  --fg: #ebe9e4;
+  --muted: #8f949c;
+  --faint: #5d626a;
+  --accent: #8fb6ff;
+  --accent-ink: #0d1626;
+  --danger: #ff8a80;
+  --ok: #8fd6a4;
+  --ui: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --mono: "Geist Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --radius: 10px;
+  --shadow: 0 10px 30px rgb(0 0 0 / .38);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--ground);
+  color: var(--fg);
+  font: 14px/1.4 var(--ui);
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.dotgrid {
+  background-color: var(--ground);
+  background-image: radial-gradient(var(--dot) 1.1px, transparent 1.3px);
+  background-size: 24px 24px;
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--panel-hi); white-space: nowrap; font-weight: 500;
+}
+.btn:hover { background: var(--panel-top); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { background: #a6c5ff; }
+.btn svg { width: 16px; height: 16px; flex: none; }
+
+.toast {
+  position: fixed; z-index: 100; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%); max-width: min(34rem, calc(100vw - 32px));
+  padding: 10px 14px; border-radius: 8px; line-height: 1.4;
+  background: var(--panel-top); border: 1px solid var(--line); box-shadow: var(--shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
