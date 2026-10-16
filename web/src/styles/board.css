@@ -214,9 +214,12 @@ kbd { font-family: inherit; font-size: 11px; padding: 1px 5px; border: 1px solid
 .upload-bar { position: absolute; left: 0; right: 0; bottom: 0; height: calc(4px / var(--s)); background: rgb(0 0 0 / .4); }
 .upload-bar b { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
 
+#topbar { overflow: hidden; }
 @media (max-width: 720px) {
   .tb .lbl { display: none; }
   #hint { display: none; }
-  .title { width: 10ch; }
+  .title { width: 7ch; min-width: 4ch; }
+  .tb.zoom { display: none; }
+  .tb { padding: 0 8px; }
   #sb-download span { display: none; }
 }

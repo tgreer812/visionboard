@@ -65,6 +65,33 @@ async function parse(ext, buf) {
   }
 }
 
+/**
+ * Auto-rigged exports (Tripo, Meshy, Mixamo-style) often ship bones whose rest pose doesn't
+ * match the mesh's bind pose, which twists the mesh when skinning is applied. Without
+ * animations the skin does nothing useful, so show each skinned mesh exactly as modelled.
+ */
+function unskin(root) {
+  const skinned = [];
+  root.traverse((o) => { if (o.isSkinnedMesh) skinned.push(o); });
+  for (const sm of skinned) {
+    const mesh = new THREE.Mesh(sm.geometry, sm.material);
+    mesh.name = sm.name;
+    mesh.position.copy(sm.position);
+    mesh.quaternion.copy(sm.quaternion);
+    mesh.scale.copy(sm.scale);
+    for (const child of [...sm.children]) mesh.add(child);
+    const parent = sm.parent;
+    if (parent) {
+      parent.children[parent.children.indexOf(sm)] = mesh;
+      mesh.parent = parent;
+      sm.parent = null;
+    } else {
+      return mesh; // the root itself was the skinned mesh
+    }
+  }
+  return root;
+}
+
 function countTriangles(root) {
   let tris = 0;
   root.traverse((o) => {
@@ -136,7 +163,7 @@ export async function startViewer(el, y) {
     const buf = await res.arrayBuffer();
     if (v.stopped) return;
     const parsed = await parse(String(y.get('ext') || '').toLowerCase(), buf);
-    root = parsed.root;
+    root = parsed.clips.length ? parsed.root : unskin(parsed.root);
     if (v.stopped) { disposeTree(root); return; }
     const tris = countTriangles(root);
     if (tris > MAX_TRIANGLES) throw new TooDense(`Too detailed to preview here (${(tris / 1e6).toFixed(1)}M triangles). Add a screenshot instead.`);
@@ -162,7 +189,7 @@ export async function startViewer(el, y) {
     scene.add(root);
 
     const camera = new THREE.PerspectiveCamera(40, 1, radius / 100, radius * 100);
-    const home = new THREE.Vector3(1, 0.65, 1.15).normalize().multiplyScalar(radius / Math.sin(THREE.MathUtils.degToRad(20)) * 1.05);
+    const home = new THREE.Vector3(1, 0.65, 1.15).normalize().multiplyScalar(radius / Math.sin(THREE.MathUtils.degToRad(20)) * 0.85);
     camera.position.copy(home);
     controls = new OrbitControls(camera, canvas);
     controls.enableZoom = false; // the wheel zooms the board
