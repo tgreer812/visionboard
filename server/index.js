@@ -34,7 +34,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/healthz', (req, res) => res.json({ ok: true, store: store.kind }));
+app.get('/healthz', (req, res) => res.json({ ok: true, store: store.kind, version: process.env.GIT_SHA || 'dev' }));
 
 // ---- rooms -------------------------------------------------------------------------------
 app.post('/api/rooms', async (req, res, next) => {

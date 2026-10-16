@@ -48,6 +48,7 @@ jobs:
         with:
           context: .
           push: true
+          build-args: GIT_SHA=${{ github.sha }}
           tags: |
             ${{ env.IMAGE }}:${{ github.sha }}
             ${{ env.IMAGE }}:latest
@@ -71,12 +72,14 @@ jobs:
           az containerapp show -n visionboard -g tg-visionboard \
             --query "{revision:properties.latestRevisionName, fqdn:properties.configuration.ingress.fqdn}" -o table
 
-      - name: Smoke test
+      - name: Wait until the new version is serving
         if: vars.AZURE_CLIENT_ID != ''
         run: |
-          for i in $(seq 1 30); do
-            if curl -fsS https://visionboard.tylergreer.io/healthz; then exit 0; fi
+          for i in $(seq 1 60); do
+            if curl -fsS https://visionboard.tylergreer.io/healthz | grep -q '"version":"${{ github.sha }}"'; then
+              echo "Serving ${{ github.sha }}"; exit 0
+            fi
             sleep 5
           done
-          echo "Site did not become healthy" >&2
+          echo "The new version never started serving" >&2
           exit 1

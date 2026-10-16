@@ -6,7 +6,8 @@ COPY . .
 RUN npm run build && npm prune --omit=dev
 
 FROM node:22-alpine
-ENV NODE_ENV=production PORT=8080
+ARG GIT_SHA=dev
+ENV NODE_ENV=production PORT=8080 GIT_SHA=$GIT_SHA
 WORKDIR /app
 COPY --from=build /app/package.json ./
 COPY --from=build /app/node_modules ./node_modules
