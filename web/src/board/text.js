@@ -9,9 +9,9 @@ import { setPresence } from './presence.js';
 let session = null;
 let typingTimer = 0;
 
-function autosize(ta) {
-  ta.style.height = 'auto';
-  ta.style.height = ta.scrollHeight + 'px';
+/** The hidden .txt copy sizes the note; the textarea is laid over it. */
+function mirror(el, value) {
+  el.querySelector('.txt').textContent = value + '​'; // keeps a trailing newline's height
 }
 
 export function isEditing() { return !!session; }
@@ -37,7 +37,7 @@ export function startEdit(id) {
   ta.value = ytext.toString();
   el.classList.add('editing');
   el.append(ta);
-  autosize(ta);
+  mirror(el, ta.value);
   ta.focus({ preventScroll: true });
   ta.setSelectionRange(ta.value.length, ta.value.length);
 
@@ -54,7 +54,7 @@ export function startEdit(id) {
         if (ins) ytext.insert(i, ins);
       }, LOCAL);
     }
-    autosize(ta);
+    mirror(el, ta.value);
     emit('geometry');
     setPresence({ act: { t: 'typing' } });
     clearTimeout(typingTimer);
@@ -79,7 +79,7 @@ export function startEdit(id) {
     }
     ta.value = ytext.toString();
     ta.setSelectionRange(s, e);
-    autosize(ta);
+    mirror(el, ta.value);
   };
   ytext.observe(observer);
 
@@ -113,7 +113,7 @@ export function endEdit() {
 export function createNote(at, text = '') {
   const s = ctx.view.s;
   const id = addItem({
-    kind: 'text', x: r1(at.x), y: r1(at.y), w: r1(360 / s), fontSize: r1(28 / s), font: 'sans', z: maxZ() + 1,
+    kind: 'text', x: r1(at.x), y: r1(at.y), w: r1(560 / s), autoW: true, fontSize: r1(28 / s), font: 'sans', z: maxZ() + 1,
   }, text);
   if (!text) startEdit(id);
   else setSelection([id]);

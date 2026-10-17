@@ -11,7 +11,7 @@ images, videos, audio, 3D models and notes on an endless canvas, all synced live
 | --- | --- |
 | Add files | Drag them in, paste (`Ctrl+V`), or use **Add files** |
 | Write a note | Double-click empty space, or press `T` |
-| Move, resize | Drag an item; drag the blue corner handle to resize |
+| Move, resize | Drag an item; drag the blue corner handle to resize. Notes also have right and bottom edge handles; text rewraps instead of scaling, and `Shift` + corner scales the whole note |
 | Select several | `Shift`-drag a box, or `Shift`-click items |
 | Pan, zoom | Drag empty space (or hold `Space`); mouse wheel or pinch to zoom; `F` fits everything |
 | Download | The download button on any file, the selection bar, or `Ctrl+S` for everything selected |

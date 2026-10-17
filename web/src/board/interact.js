@@ -49,6 +49,15 @@ function onDown(e) {
   const itemEl = e.target.closest('.item');
   const id = itemEl && itemEl.dataset.id;
   if (id && ctx.items.has(id)) {
+    // A handle on the selected item resizes, even with Shift held (Shift scales notes).
+    const handle = e.target.closest('.handle');
+    if (handle && ctx.selection.size === 1 && ctx.selection.has(id)) {
+      raise(id);
+      const o = geom(id);
+      if (o.kind === 'text') { const el = ctx.els.get(id); o.w = el.offsetWidth; o.h = el.offsetHeight; }
+      g = { type: 'resize', id, sx: e.clientX, sy: e.clientY, o, dir: handle.dataset.dir || 'se', scale: e.shiftKey, moved: false };
+      return;
+    }
     let clickSelectOnly = false;
     if (e.shiftKey || e.ctrlKey || e.metaKey) {
       const next = new Set(ctx.selection);
@@ -61,15 +70,9 @@ function onDown(e) {
       clickSelectOnly = ctx.selection.size > 1;
     }
     raise(id);
-    if (e.target.closest('.handle') && ctx.selection.size === 1) {
-      const o = geom(id);
-      if (o.kind === 'text') o.h = ctx.els.get(id).offsetHeight;
-      g = { type: 'resize', id, sx: e.clientX, sy: e.clientY, o, moved: false };
-    } else {
-      const orig = new Map();
-      for (const sid of ctx.selection) { const sg = geom(sid); if (sg) orig.set(sid, { x: sg.x, y: sg.y }); }
-      g = { type: 'move', id, sx: e.clientX, sy: e.clientY, orig, moved: false, clickSelectOnly };
-    }
+    const orig = new Map();
+    for (const sid of ctx.selection) { const sg = geom(sid); if (sg) orig.set(sid, { x: sg.x, y: sg.y }); }
+    g = { type: 'move', id, sx: e.clientX, sy: e.clientY, orig, moved: false, clickSelectOnly };
     return;
   }
   if (e.shiftKey) {
@@ -80,7 +83,7 @@ function onDown(e) {
   startPan(e);
 }
 
-function resizePatch(o, dx, dy) {
+function resizePatch(o, dx, dy, dir, scale) {
   const s = ctx.view.s;
   switch (o.kind) {
     case 'image':
@@ -94,8 +97,15 @@ function resizePatch(o, dx, dy) {
       return { w: r1(Math.max(min, o.w + dx)), h: r1(Math.max(min * 0.8, o.h + dy)) };
     }
     default: {
-      const k = Math.max((16 / s) / o.w, (o.w + dx) / o.w);
-      return { w: r1(o.w * k), fontSize: r1(Math.max(0.5, o.fontSize * k)) };
+      // Notes: Shift scales everything (text included); otherwise the box resizes and text rewraps.
+      if (scale) {
+        const k = Math.max((16 / s) / o.w, (o.w + dx) / o.w);
+        return { w: r1(o.w * k), fontSize: r1(Math.max(0.5, o.fontSize * k)), minH: r1((o.minH || 0) * k), autoW: false };
+      }
+      const p = { autoW: false, w: r1(o.w) };
+      if (dir !== 's') p.w = r1(Math.max(o.fontSize * 1.5, o.w + dx));
+      if (dir !== 'e') p.minH = r1(Math.max(0, o.h + dy));
+      return p;
     }
   }
 }
@@ -136,7 +146,7 @@ function onMove(e) {
     for (const [id, o] of g.orig) { ctx.local.set(id, { x: r1(o.x + dx), y: r1(o.y + dy) }); renderItem(id); }
     setPresence({ drag: { ids: [...g.orig.keys()].slice(0, 500), dx, dy } });
   } else if (g.type === 'resize') {
-    g.patch = resizePatch(g.o, dxs / s, dys / s);
+    g.patch = resizePatch(g.o, dxs / s, dys / s, g.dir, g.scale || e.shiftKey);
     ctx.local.set(g.id, g.patch);
     renderItem(g.id);
     setPresence({ drag: { id: g.id, ...g.patch } });

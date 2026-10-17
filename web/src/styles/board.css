@@ -36,6 +36,20 @@ body.board { overflow: hidden; overscroll-behavior: none; touch-action: none; }
 }
 .item.sel.solo .handle { display: block; }
 .item.audio .handle { cursor: ew-resize; }
+/* notes also get edge handles: right = width, bottom = height */
+.handle.e, .handle.s { background: transparent; border: 0; border-radius: 0; }
+.handle.e { top: 0; bottom: calc(10px / var(--s)); right: calc(-7px / var(--s)); height: auto; width: calc(14px / var(--s)); cursor: ew-resize; }
+.handle.s { left: 0; right: calc(10px / var(--s)); bottom: calc(-7px / var(--s)); width: auto; height: calc(14px / var(--s)); cursor: ns-resize; }
+.handle.e::after, .handle.s::after {
+  content: ""; position: absolute; background: var(--accent); border-radius: 2px; opacity: .85;
+}
+.handle.e::after { left: 50%; top: 50%; width: calc(4px / var(--s)); height: min(calc(22px / var(--s)), 60%); translate: -50% -50%; }
+.handle.s::after { left: 50%; top: 50%; height: calc(4px / var(--s)); width: min(calc(22px / var(--s)), 60%); translate: -50% -50%; }
+@media (pointer: coarse) {
+  .handle.se { width: calc(24px / var(--s)); height: calc(24px / var(--s)); right: calc(-13px / var(--s)); bottom: calc(-13px / var(--s)); }
+  .handle.e { width: calc(24px / var(--s)); right: calc(-12px / var(--s)); }
+  .handle.s { height: calc(24px / var(--s)); bottom: calc(-12px / var(--s)); }
+}
 
 /* screen-sized floating buttons on media */
 .hover-tools {
@@ -120,8 +134,14 @@ body.board { overflow: hidden; overscroll-behavior: none; touch-action: none; }
 .item.text.serif .txt, .item.text.serif textarea { font-family: var(--serif); font-weight: 400; letter-spacing: 0; }
 .item.text.mono .txt, .item.text.mono textarea { font-family: var(--mono); font-weight: 400; letter-spacing: 0; }
 .item.text .txt:empty::before { content: "…"; color: var(--faint); }
-.item.text.editing .txt { display: none; }
-.item.text textarea { caret-color: var(--accent); user-select: text; -webkit-user-select: text; }
+.item.text { min-width: .6em; }
+.item.text .txt { min-height: 100%; }
+.item.text.editing { min-width: 3em; }
+.item.text.editing .txt { visibility: hidden; }
+.item.text textarea {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  caret-color: var(--accent); user-select: text; -webkit-user-select: text;
+}
 
 /* ---- chrome ---- */
 .chrome {

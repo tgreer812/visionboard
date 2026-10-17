@@ -55,6 +55,7 @@ export function geom(id) {
   const g = {
     kind: y.get('kind'), x: y.get('x') || 0, y: y.get('y') || 0, w: y.get('w') || 100, h: y.get('h') || 100,
     z: y.get('z') || 0, fontSize: y.get('fontSize') || 32,
+    autoW: !!y.get('autoW'), minH: y.get('minH') || 0,
   };
   Object.assign(g, ctx.remote.get(id), ctx.local.get(id));
   return g;

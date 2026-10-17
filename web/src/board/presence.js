@@ -73,7 +73,8 @@ function applyRemoteDrags(list) {
       }
     } else if (typeof d.id === 'string' && ctx.items.has(d.id)) {
       const g = {};
-      for (const k of ['w', 'h', 'fontSize']) if (Number.isFinite(d[k])) g[k] = d[k];
+      for (const k of ['w', 'h', 'fontSize', 'minH']) if (Number.isFinite(d[k])) g[k] = d[k];
+      if (d.autoW === false) g.autoW = false;
       next.set(d.id, g);
     }
   }

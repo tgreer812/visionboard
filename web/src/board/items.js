@@ -209,9 +209,12 @@ function build(id, y) {
   else if (kind === 'audio') buildAudio(el, id, y);
   else if (kind === 'model') buildModel(el, id, y);
   else buildText(el);
-  const h = document.createElement('div');
-  h.className = 'handle';
-  el.append(h);
+  for (const dir of kind === 'text' ? ['se', 'e', 's'] : ['se']) {
+    const h = document.createElement('div');
+    h.className = 'handle ' + dir;
+    h.dataset.dir = dir;
+    el.append(h);
+  }
   return el;
 }
 
@@ -227,9 +230,12 @@ export function renderItem(id) {
   if (!el) { el = build(id, y); ctx.els.set(id, el); ctx.world.append(el); }
   const g = geom(id);
   el.style.transform = `translate(${g.x}px, ${g.y}px)`;
-  el.style.width = g.w + 'px';
   el.style.zIndex = String(Math.round(g.z));
   if (g.kind === 'text') {
+    // New notes hug their text up to `w`; once someone resizes one it keeps the size they chose.
+    el.style.width = g.autoW ? 'max-content' : g.w + 'px';
+    el.style.maxWidth = g.autoW ? g.w + 'px' : '';
+    el.style.minHeight = g.minH ? g.minH + 'px' : '';
     el.style.height = '';
     el.style.fontSize = g.fontSize + 'px';
     const font = y.get('font');
@@ -242,6 +248,7 @@ export function renderItem(id) {
       if (d.textContent !== s) d.textContent = s;
     }
   } else {
+    el.style.width = g.w + 'px';
     el.style.height = g.h + 'px';
     // Card contents are sized in em so they scale with the card.
     if (g.kind === 'audio') el.style.fontSize = (g.h / 92) * 14 + 'px';
@@ -273,7 +280,8 @@ export function itemBox(id) {
   const g = geom(id);
   if (!g) return null;
   const el = ctx.els.get(id);
-  const h = g.kind === 'text' ? (el ? el.offsetHeight : g.fontSize * 1.3) : g.h;
+  if (g.kind === 'text' && el) return { x0: g.x, y0: g.y, x1: g.x + el.offsetWidth, y1: g.y + el.offsetHeight };
+  const h = g.kind === 'text' ? g.fontSize * 1.3 : g.h;
   return { x0: g.x, y0: g.y, x1: g.x + g.w, y1: g.y + h };
 }
 
