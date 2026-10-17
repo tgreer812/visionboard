@@ -22,7 +22,7 @@ images, videos, audio, 3D models and notes on an endless canvas, all synced live
 
 Supported uploads: images (png, jpg, gif, webp, avif, svg, bmp) up to 40 MB, video (mp4, webm, mov,
 ogv) up to 300 MB, audio (mp3, wav, ogg, opus, m4a, aac, flac, weba) up to 100 MB, and models (glb,
-single-file gltf, obj, stl, fbx, ply) up to 60 MB. Models over 1.5M triangles won't preview.
+single-file gltf, obj, stl, fbx, ply) up to 100 MB. Models over 1.5M triangles won't preview.
 
 ## How it works
 

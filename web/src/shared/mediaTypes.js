@@ -26,7 +26,7 @@ export const KINDS = {
   },
   model: {
     label: '3D model',
-    max: 60 * MB,
+    max: 100 * MB,
     exts: {
       glb: 'model/gltf-binary', gltf: 'model/gltf+json', obj: 'model/obj', stl: 'model/stl',
       fbx: 'application/octet-stream', ply: 'application/octet-stream',
